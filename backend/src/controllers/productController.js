@@ -3,10 +3,18 @@ import { supabase } from '../config/supabase.js';
 // Get all products
 export const getAllProducts = async (req, res) => {
   try {
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .order('created_at', { ascending: false });
+    const q = (req.query.q || '').trim();
+
+    let dbQuery = supabase.from('products').select('*');
+
+    if (q) {
+      const like = `%${q}%`;
+      dbQuery = dbQuery.or(
+        `product_name.ilike.${like},description.ilike.${like},category.ilike.${like}`
+      );
+    }
+
+    const { data, error } = await dbQuery.order('created_at', { ascending: false });
 
     if (error) throw error;
 

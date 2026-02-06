@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from "../utils/supabase";
+import { productAPI } from "../utils/api";
 
 const NavbarSearch = () => {
   const [query, setQuery] = useState('');
@@ -37,35 +37,44 @@ const NavbarSearch = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Update suggestions based on query
+  // Update suggestions based on query (fetch from backend)
   useEffect(() => {
     if (query.trim() === '') {
       setSuggestions([]);
       return;
     }
 
-    const products = getProducts();
+    const controller = new AbortController();
+    const signal = controller.signal;
 
-    // Filter products based on query
-    const filtered = products.filter(
-      (product) =>
-        (product.name && product.name.toLowerCase().includes(query.toLowerCase())) ||
-        (product.category && product.category.toLowerCase().includes(query.toLowerCase()))
-    );
+    // debounce requests
+    const t = setTimeout(async () => {
+      try {
+        const data = await productAPI.searchProducts(query);
+        // normalize response to array
+        const products = Array.isArray(data) ? data : (data?.data || data?.products || []);
 
-    // Get unique categories from filtered products
-    const uniqueCategories = Array.from(
-      new Set(filtered.map((product) => product.category))
-    );
+        if (signal.aborted) return;
 
-    // Prepare suggestions: one per category
-    const categorySuggestions = uniqueCategories.map((category) => {
-      // Find a representative product for each category
-      const product = filtered.find((p) => p.category === category);
-      return { ...product, category };
-    });
+        // Get unique categories from returned products
+        const uniqueCategories = Array.from(new Set(products.map((p) => p.category).filter(Boolean)));
 
-    setSuggestions(categorySuggestions);
+        const categorySuggestions = uniqueCategories.map((category) => {
+          const product = products.find((p) => p.category === category) || {};
+          return { ...product, category };
+        });
+
+        setSuggestions(categorySuggestions);
+      } catch (err) {
+        if (err.name !== 'AbortError') console.error('Search error', err);
+        setSuggestions([]);
+      }
+    }, 300);
+
+    return () => {
+      clearTimeout(t);
+      controller.abort();
+    };
   }, [query]);
 
   const handleSearch = (e) => {
@@ -93,15 +102,13 @@ const NavbarSearch = () => {
       
       <div className={`hidden md:block ${showMobileSearch ? 'hidden' : 'block'}`}>
         <form onSubmit={handleSearch} className="">
-          <div
-            className="w-64 rounded-[20px] border border-gray-300 inline-flex items-center focus:border-gray-300 py-1 pl-4 pr-4"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          >
+          <div className="w-64 rounded-[20px] border border-gray-300 inline-flex items-center focus:border-gray-300 py-1 pl-4 pr-4">
             <input
               type="text"
               placeholder="Search beads"
-              className="focus:outline-none"
+              className="focus:outline-none w-full bg-transparent"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
             />
             <button
               type="submit"

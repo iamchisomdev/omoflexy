@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:5173', // Your Vite frontend URL
+  origin: process.env.HOST || 'http://localhost:5173', // Your Vite frontend URL
   credentials: true, // allow cookies
 }));
 app.use(express.json());

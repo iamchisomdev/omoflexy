@@ -18,10 +18,17 @@ export const productAPI = {
     const data = await response.json();
     return data;
   },
+  // Search products by query string (backend should support `?q=` or similar)
+  searchProducts: async (query) => {
+    const response = await fetch(`${API_URL}/products?q=${encodeURIComponent(query)}`);
+    const data = await response.json();
+    return data;
+  },
   getProduct: async (id) => {
     const response = await fetch(`${API_URL}/products/${id}`);
     const data = await response.json();
-    return data;
+    // Handle case where data might be { data: {...} } or direct object
+    return Array.isArray(data) ? data[0] : (data?.data || data?.product || data);
   },
   createProduct: async (productData) => {
     const response = await fetch(`${API_URL}/products`, {

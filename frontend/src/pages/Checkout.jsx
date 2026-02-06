@@ -5,6 +5,7 @@ import Navbar from "../components/Navbar";
 import Recommendation from "../components/Recommendation";
 import Footer from "../components/Footer";
 import { ToastContainer, toast } from 'react-toastify'
+import { productAPI } from "../utils/api";
 
 
 
@@ -12,16 +13,50 @@ export default function Checkout() {
   const navigate = useNavigate();
 
   const [cart, setCart] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("cart")) || [];
-    const sanitized = stored.map((item) => ({
-      ...item,
-      product_name: item.product_name || "Unnamed Product",
-      price: typeof item.price === "number" ? item.price : 0,
-      quantity: typeof item.quantity === "number" ? item.quantity : 1,
-    }));
-    setCart(sanitized);
+    const loadCart = async () => {
+      try {
+        setLoading(true);
+        const stored = JSON.parse(localStorage.getItem("cart")) || [];
+        
+        // Fetch full product details from API for each cart item
+        const enrichedCart = await Promise.all(
+          stored.map(async (item) => {
+            try {
+              const productData = await productAPI.getProduct(item.id);
+              return {
+                ...item,
+                product_name: productData?.name || item.product_name || "Unnamed Product",
+                price: typeof productData?.price === "number" ? productData.price : (typeof item.price === "number" ? item.price : 0),
+                product_image: productData?.image || item.product_image,
+                quantity: typeof item.quantity === "number" ? item.quantity : 1,
+              };
+            } catch (err) {
+              console.error(`Error fetching product ${item.id}:`, err);
+              return {
+                ...item,
+                product_name: item.product_name || "Unnamed Product",
+                price: typeof item.price === "number" ? item.price : 0,
+                quantity: typeof item.quantity === "number" ? item.quantity : 1,
+              };
+            }
+          })
+        );
+        
+        setCart(enrichedCart);
+        setError(null);
+      } catch (err) {
+        console.error("Error loading cart:", err);
+        setError("Failed to load cart");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCart();
   }, []);
 
 
@@ -60,12 +95,35 @@ export default function Checkout() {
 
 
   const notify = () => toast("Your cart is empty!");
+  
+  // Loading state
+  if (loading) {
+    return (
+      <div className="">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-[60vh] mt-[7rem]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading cart...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="">
       <Navbar />
       <div className="flex flex-col md:flex-row mt-[7rem] p-4 gap-6 inter">
 
         <ToastContainer toastClassName="poppins" />
+
+        {/* Error Message */}
+        {error && (
+          <div className="w-full bg-red-50 border border-red-200 p-4 rounded">
+            <p className="text-red-700 font-medium">{error}</p>
+          </div>
+        )}
 
         {/* Cart Items */}
         {cart.length === 0 ? (

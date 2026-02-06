@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { supabase } from "../utils/supabase";
+import { productAPI } from "../utils/api";
 import Navbar from "../components/Navbar";
 import Recommendation from "../components/Recommendation";
 import Footer from "../components/Footer";
@@ -18,14 +18,26 @@ const SearchPage = () => {
       return;
     }
 
-    const products = getProducts(); // or however you fetch your products
+    let cancelled = false;
+    const controller = new AbortController();
 
-    const filtered = products.filter(
-      (product) =>
-        (product.name && product.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (product.category && product.category.toLowerCase().includes(searchQuery.toLowerCase()))
-    );
-    setResults(filtered);
+    const fetchResults = async () => {
+      try {
+        const data = await productAPI.searchProducts(searchQuery);
+        const products = Array.isArray(data) ? data : (data?.data || data?.products || []);
+        if (!cancelled) setResults(products);
+      } catch (err) {
+        if (err.name !== 'AbortError') console.error('Search error', err);
+        if (!cancelled) setResults([]);
+      }
+    };
+
+    fetchResults();
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
   }, [searchQuery]);
 
   return (
