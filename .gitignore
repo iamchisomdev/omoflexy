@@ -1,0 +1,9 @@
+# Ignore dependencies
+**/node_modules/
+
+# Ignore environment variables (security!)
+**/.env
+
+# Ignore build folders
+**/dist/
+**/build/
