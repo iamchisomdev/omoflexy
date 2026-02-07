@@ -1,5 +1,13 @@
 import { supabase } from '../config/supabase.js';
 
+
+export const testingMethod = async (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Testing method works!'
+  });
+}
+
 // Get all products
 export const getAllProducts = async (req, res) => {
   try {
