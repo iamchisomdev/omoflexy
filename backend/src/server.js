@@ -11,10 +11,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors({
-  origin: process.env.HOST || 'http://localhost:5173', // Your Vite frontend URL
-  credentials: true, // allow cookies
-}));
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

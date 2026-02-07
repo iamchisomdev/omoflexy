@@ -1,0 +1,2 @@
+###
+GET https://omoflexy-42ai.vercel.app/api/test
