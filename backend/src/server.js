@@ -10,22 +10,38 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors());
+// CORS - MUST be before other middleware
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true
+}));
+
+// Body parsing middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Session middleware for login/logout
+// Session middleware
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'your-secret-key', // set this in .env
+  secret: process.env.SESSION_SECRET || 'your-secret-key',
   resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false } // set true if using https
+  saveUninitialized: false, // Changed to false for better security
+  cookie: { 
+    secure: true, // Set true in production with HTTPS
+    httpOnly: true,
+    sameSite: 'lax', // Important for cross-origin requests
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
 }));
+
+// Log all incoming requests
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
 
 // Routes
 app.use('/api', productRoutes);
-app.use('/api/auth', authRoutes); // <-- added auth routes
+app.use('/api/auth', authRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

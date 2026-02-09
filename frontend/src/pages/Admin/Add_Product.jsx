@@ -99,17 +99,7 @@ const ProductForm = ({ onSuccess }) => {
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">Image URL</label>
-          <input
-            type="url"
-            name="product_image"
-            value={formData.product_image}
-            onChange={handleChange}
-            required
-            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
-          />
-        </div>
+        
 
         <div>
           <label className="block text-sm font-medium mb-1">Description</label>

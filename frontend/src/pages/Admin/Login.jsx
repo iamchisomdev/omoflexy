@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { authAPI } from '../../utils/api' // Adjust path based on your folder structure
 import { useNavigate } from 'react-router-dom' // If you're using React Router
+import Logo from '../../assets/image/logo1.jpg' // Adjust path to your logo image
 
 function LoginPage() {
   const [email, setEmail] = useState('')
@@ -31,16 +32,12 @@ function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col inter">
       {/* Header with Logo */}
       <div className="p-6">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 border-2 border-black rounded-sm flex items-center justify-center">
-            <div className="w-3 h-3 bg-black rounded-sm"></div>
-          </div>
           <div className="flex flex-col leading-tight">
-            <span className="text-sm font-semibold">SmokeView Road</span>
-            <span className="text-xs text-gray-500">Lagos</span>
+            <img src={Logo} alt="Logo" className="w-30 h-30 object-contain" />
           </div>
         </div>
       </div>
@@ -48,10 +45,10 @@ function LoginPage() {
       {/* Login Form Container */}
       <div className="flex-1 flex items-start justify-center pt-12">
         <div className="w-full max-w-md px-6">
-          <div className="border border-gray-200 rounded-lg p-8 shadow-sm">
+          <div className="border border-[#EDEDED] rounded-[6px] p-8 shadow-sm">
             {/* Form Header */}
             <div className="mb-8 text-center">
-              <h1 className="text-2xl font-medium text-gray-900 mb-2">Login</h1>
+              <h1 className="text-[18px] font-700 text-[#544F4F] mb-2">Login</h1>
               <p className="text-sm text-gray-500">Enter your login details to continue</p>
             </div>
 

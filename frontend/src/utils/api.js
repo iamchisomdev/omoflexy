@@ -72,7 +72,7 @@ export const authAPI = {
     const data = await response.json().catch(() => ({}));
 
     if (response.ok) {
-      if (navigate) navigate('/dashboard'); // redirect after successful login
+      if (navigate) navigate('/admin/dashboard'); // redirect after successful login
       return data;
     }
 

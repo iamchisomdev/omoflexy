@@ -1,7 +1,23 @@
 import { Search, Plus, SlidersHorizontal, Trash2, Milk } from "lucide-react";
 import { useState, useEffect } from "react";
 import { productAPI } from "../../utils/api";
-import AddProductModal from '../../components/modals/AddProductModal';
+import AddProductModal from "../../components/modals/AddProductModal";
+import Sidebar from "../../components/Admin/Sidebar";
+
+// Laptop only wrapper (no logic changed)
+const LaptopOnly = ({ children }) => (
+  <div className="min-h-screen inter">
+    <div className="block lg:hidden h-screen w-full flex items-center justify-center bg-gray-100">
+      <div className="text-center max-w-md p-6">
+        <h1 className="text-2xl font-semibold mb-2">Laptop Only</h1>
+        <p className="text-gray-600">
+          This admin dashboard is only accessible on a laptop or large screen.
+        </p>
+      </div>
+    </div>
+    <div className="hidden lg:block">{children}</div>
+  </div>
+);
 
 const ProductTable = () => {
   const [products, setProducts] = useState([]);
@@ -15,7 +31,6 @@ const ProductTable = () => {
       try {
         setLoading(true);
         const data = await productAPI.getAllProducts();
-        // Handle case where data might be { data: [...] } or an array
         const productsList = Array.isArray(data)
           ? data
           : data?.data || data?.products || [];
@@ -46,142 +61,145 @@ const ProductTable = () => {
   };
 
   return (
-    <div className="flex-1 bg-gray-50 p-8">
-      <div className="bg-white rounded-lg shadow-sm">
-        {/* Header Section */}
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-            My Products
-          </h2>
+    <LaptopOnly>
+      <div className="">
+        <img src="/src/assets/image/logo1.jpg" alt="Logo" className="w-50 h-50 ml-5 my-2 object-contain" />
+        <div className="flex">
+          <Sidebar />
+          <div className="flex-1 px-3 py-5 min-h-screen inter">
+            <div className="bg-white">
+              {/* Header Section */}
+              <div className="p-2">
+                <h2 className="text-[20px] font-semibold text-gray-800 mb-3">
+                  My Products
+                </h2>
+                <hr className="mb-5"/>
+                <div className="flex items-center justify-between mb-6 w-[100%]">
+                  {/* Search */}
+                  <div className="relative">
+                    <Search
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                      size={18}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Search Products..."
+                      className="w-[100%] pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                    />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setIsModalOpen(true)}
+                      className="flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-2xl shadow hover:opacity-90"
+                    >
+                      <Plus size={18} />
+                      Add Product
+                    </button>
 
-          <div className="flex items-center justify-between gap-4">
-            {/* Search Bar */}
-            <div className="flex-1 max-w-md relative">
-              <Search
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                size={20}
-              />
-              <input
-                type="text"
-                placeholder="Search Products..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-              />
-            </div>
+                    <AddProductModal
+                      isOpen={isModalOpen}
+                      closeModal={() => setIsModalOpen(false)}
+                    />
 
-            {/* Action Buttons */}
-            <div className="flex items-center gap-3">
-              <div className="p-8">
-                <button
-                  onClick={() => setIsModalOpen(true)}
-                  className="bg-yellow-600 text-white p-2 rounded"
-                >
-                  Add Product
-                </button>
-                <AddProductModal
-                  isOpen={isModalOpen}
-                  closeModal={() => setIsModalOpen(false)}
-                />
+                    <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-2xl hover:bg-gray-50">
+                      <SlidersHorizontal size={18} />
+                      <span className="font-medium">Sort and Filter</span>
+                    </button>
+                  </div>
+                </div>
               </div>
-              <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                <SlidersHorizontal size={20} />
-                <span className="font-medium">Sort and Filter</span>
-              </button>
+
+              {/* Error */}
+              {error && (
+                <div className="mx-8 mt-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+                  <p className="text-red-700 font-medium">Error: {error}</p>
+                </div>
+              )}
+
+              {/* Loading */}
+              {loading ? (
+                <div className="p-12 text-center text-gray-500">
+                  Loading products...
+                </div>
+              ) : products.length === 0 ? (
+                <div className="p-12 text-center text-gray-500">
+                  No products found
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50 border-y border-gray-100">
+                      <tr className="text-left">
+                        <th className="px-8 py-4 font-semibold text-gray-600">
+                          Product Name
+                        </th>
+                        <th className="px-8 py-4 font-semibold text-gray-600">
+                          Category
+                        </th>
+                        <th className="px-8 py-4 font-semibold text-gray-600">
+                          Date Created
+                        </th>
+                        <th className="px-8 py-4 font-semibold text-gray-600">
+                          Product Quantity
+                        </th>
+                        <th className="px-8 py-4 font-semibold text-gray-600">
+                          Price
+                        </th>
+                        <th className="px-8 py-4 font-semibold text-gray-600">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+
+                    <tbody className="divide-y divide-gray-100">
+                      {products.map((product) => (
+                        <tr key={product.id} className="hover:bg-gray-50">
+                          <td className="px-8 py-5">
+                            <div className="flex items-center gap-3">
+                              <span className="font-medium text-gray-900">
+                                {product.product_name}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-8 py-5 text-gray-600">
+                            {product.category}
+                          </td>
+                          <td className="px-8 py-5 text-gray-600">
+                            {product.created_at
+                              ? new Date(product.created_at).toLocaleDateString()
+                              : "N/A"}
+                          </td>
+                          <td className="px-8 py-5 text-gray-600">
+                            {product.quantity}
+                          </td>
+                          <td className="px-8 py-5 font-semibold text-gray-900">
+                            {product.price}
+                          </td>
+                          <td className="px-8 py-5">
+                            <div className="flex items-center gap-4">
+                              <button
+                                onClick={() => handleDelete(product.id)}
+                                className="flex items-center gap-1.5 text-red-500 hover:text-red-700"
+                              >
+                                <Trash2 size={16} />
+                                <span className="font-medium">Delete</span>
+                              </button>
+                              <button className="font-medium text-gray-700 hover:text-gray-900">
+                                Edit
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className="p-6 bg-red-50 border-b border-red-200">
-            <p className="text-red-700 font-medium">Error: {error}</p>
-          </div>
-        )}
-
-        {/* Loading State */}
-        {loading ? (
-          <div className="p-8 text-center text-gray-500">
-            <p>Loading products...</p>
-          </div>
-        ) : products.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">
-            <p>No products found</p>
-          </div>
-        ) : (
-          /* Table Section */
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                    Product Name
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                    Category
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                    Date Created
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                    Product Quantity
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                    Price
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {products.map((product) => (
-                  <tr
-                    key={product.id}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center">
-                          <Milk size={24} className="text-gray-600" />
-                        </div>
-                        <span className="font-medium text-gray-900">
-                          {product.name}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-gray-600">
-                      {product.category}
-                    </td>
-                    <td className="px-6 py-4 text-gray-600">
-                      {product.dateCreated}
-                    </td>
-                    <td className="px-6 py-4 text-gray-600">
-                      {product.quantity}
-                    </td>
-                    <td className="px-6 py-4 font-medium text-gray-900">
-                      {product.price}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <button
-                          onClick={() => handleDelete(product.id)}
-                          className="flex items-center gap-1 text-red-500 hover:text-red-700 transition-colors"
-                        >
-                          <Trash2 size={16} />
-                          <span className="text-sm font-medium">Delete</span>
-                        </button>
-                        <button className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">
-                          Edit
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
       </div>
-    </div>
+    </LaptopOnly>
   );
 };
 

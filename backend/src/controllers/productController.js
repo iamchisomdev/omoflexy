@@ -1,39 +1,40 @@
-import { supabase } from '../config/supabase.js';
-
+import { supabase } from "../config/supabase.js";
 
 export const testingMethod = async (req, res) => {
   res.status(200).json({
     success: true,
-    message: 'Testing method works!'
+    message: "Testing method works!",
   });
-}
+};
 
 // Get all products
 export const getAllProducts = async (req, res) => {
   try {
-    const q = (req.query.q || '').trim();
+    const q = (req.query.q || "").trim();
 
-    let dbQuery = supabase.from('products').select('*');
+    let dbQuery = supabase.from("products").select("*");
 
     if (q) {
       const like = `%${q}%`;
       dbQuery = dbQuery.or(
-        `product_name.ilike.${like},description.ilike.${like},category.ilike.${like}`
+        `product_name.ilike.${like},description.ilike.${like},category.ilike.${like},price.ilike.${like}`,
       );
     }
 
-    const { data, error } = await dbQuery.order('created_at', { ascending: false });
+    const { data, error } = await dbQuery.order("created_at", {
+      ascending: false,
+    });
 
     if (error) throw error;
 
     res.status(200).json({
       success: true,
-      data: data
+      data: data,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -43,54 +44,125 @@ export const getProduct = async (req, res) => {
   try {
     const { id } = req.params;
     const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .eq('id', id)
+      .from("products")
+      .select("*")
+      .eq("id", id)
       .single();
 
     if (error) throw error;
 
     res.status(200).json({
       success: true,
-      data: data
+      data: data,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
 
 // Create product (Admin)
 export const createProduct = async (req, res) => {
+  console.log("=== DEBUG INFO ===");
+  console.log("BODY:", req.body);
+  console.log("FILES:", req.files);
+  console.log("==================");
+
   try {
-    const { product_name, category, price, product_image, description } = req.body;
+    // Validate that we have data
+    if (!req.body) {
+      return res.status(400).json({
+        success: false,
+        message: "No data received"
+      });
+    }
+
+    const { product_name, quantity, category, price, description } = req.body || {};
+    const files = req.files || [];
+
+    // Validate required fields (quantity is optional)
+    if (!product_name || !category || !price) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields: product_name, category, price are required"
+      });
+    }
+
+    let imageUrls = [];
+
+    // Upload images to Supabase (handle single or multiple files)
+    if (files.length > 0) {
+      console.log(`Uploading ${files.length} image(s)...`);
+
+      for (const file of files) {
+        // multer's any() may provide fieldname; use originalname
+        const fileName = `products/${Date.now()}-${file.originalname}`;
+
+        console.log(`Uploading file: ${fileName}`);
+
+        const { error: uploadError } = await supabase.storage
+          .from("product-images")
+          .upload(fileName, file.buffer, {
+            contentType: file.mimetype,
+          });
+
+        if (uploadError) {
+          console.error("Upload error:", uploadError);
+          // continue to next file instead of throwing to avoid 500 for one failed image
+          continue;
+        }
+
+        const { data: urlData } = supabase.storage
+          .from("product-images")
+          .getPublicUrl(fileName);
+
+        if (urlData && urlData.publicUrl) imageUrls.push(urlData.publicUrl);
+        console.log(`Image uploaded: ${urlData?.publicUrl}`);
+      }
+    }
+
+    console.log("Inserting product into database...");
+
+    // Insert product into database
+    const insertPayload = {
+      product_name,
+      category,
+      price: parseFloat(price),
+      description,
+    };
+
+    if (quantity) insertPayload.quantity = parseInt(quantity);
+    if (imageUrls.length > 0) insertPayload.product_images = imageUrls;
 
     const { data, error } = await supabase
-      .from('products')
-      .insert([
-        {
-          product_name,
-          category,
-          price,
-          product_image,
-          description,
-        }
-      ])
+      .from("products")
+      .insert([insertPayload])
       .select();
 
-    if (error) throw error;
+    if (error) {
+      console.error("Database error:", error);
+      throw new Error(`Database error: ${error.message}`);
+    }
+
+    console.log("Product created successfully:", data[0]);
 
     res.status(201).json({
       success: true,
-      message: 'Product created successfully',
-      data: data[0]
+      message: "Product created successfully",
+      data: data[0],
     });
+
   } catch (error) {
+    console.error("=== ERROR IN createProduct ===");
+    console.error("Error message:", error.message);
+    console.error("Error stack:", error.stack);
+    console.error("==============================");
+    
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message || "Internal server error",
     });
   }
 };
@@ -102,22 +174,22 @@ export const updateProduct = async (req, res) => {
     const updates = req.body;
 
     const { data, error } = await supabase
-      .from('products')
+      .from("products")
       .update(updates)
-      .eq('id', id)
+      .eq("id", id)
       .select();
 
     if (error) throw error;
 
     res.status(200).json({
       success: true,
-      message: 'Product updated successfully',
-      data: data[0]
+      message: "Product updated successfully",
+      data: data[0],
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -127,21 +199,18 @@ export const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const { error } = await supabase
-      .from('products')
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.from("products").delete().eq("id", id);
 
     if (error) throw error;
 
     res.status(200).json({
       success: true,
-      message: 'Product deleted successfully'
+      message: "Product deleted successfully",
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
