@@ -4,10 +4,8 @@ import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import Recommendation from "../components/Recommendation";
 import Footer from "../components/Footer";
-import { ToastContainer, toast } from 'react-toastify'
+import { ToastContainer, toast } from "react-toastify";
 import { productAPI } from "../utils/api";
-
-
 
 export default function Checkout() {
   const navigate = useNavigate();
@@ -21,17 +19,25 @@ export default function Checkout() {
       try {
         setLoading(true);
         const stored = JSON.parse(localStorage.getItem("cart")) || [];
-        
+
         // Fetch full product details from API for each cart item
         const enrichedCart = await Promise.all(
           stored.map(async (item) => {
             try {
-              const productData = await productAPI.getProduct(item.id);
+              const productData = await productAPI.getAllProducts(item.id);
               return {
                 ...item,
-                product_name: productData?.name || item.product_name || "Unnamed Product",
-                price: typeof productData?.price === "number" ? productData.price : (typeof item.price === "number" ? item.price : 0),
-                product_image: productData?.image || item.product_image,
+                product_name:
+                  productData?.name || item.product_name || "Unnamed Product",
+                price:
+                  typeof productData?.price === "number"
+                    ? productData.price
+                    : typeof item.price === "number"
+                      ? item.price
+                      : 0,
+                product_images:
+                  productData?.images || item.product_images || [],
+                color: item.color || null,
                 quantity: typeof item.quantity === "number" ? item.quantity : 1,
               };
             } catch (err) {
@@ -40,12 +46,14 @@ export default function Checkout() {
                 ...item,
                 product_name: item.product_name || "Unnamed Product",
                 price: typeof item.price === "number" ? item.price : 0,
+                product_images: item.product_images || [],
+                color: item.color || null,
                 quantity: typeof item.quantity === "number" ? item.quantity : 1,
               };
             }
-          })
+          }),
         );
-        
+
         setCart(enrichedCart);
         setError(null);
       } catch (err) {
@@ -59,7 +67,6 @@ export default function Checkout() {
     loadCart();
   }, []);
 
-
   const updateCart = (newCart) => {
     setCart(newCart);
     localStorage.setItem("cart", JSON.stringify(newCart));
@@ -68,7 +75,7 @@ export default function Checkout() {
 
   const increaseQty = (id) => {
     const updated = cart.map((item) =>
-      item.id === id ? { ...item, quantity: item.quantity + 1 } : item
+      item.id === id ? { ...item, quantity: item.quantity + 1 } : item,
     );
     updateCart(updated);
   };
@@ -76,7 +83,7 @@ export default function Checkout() {
   const decreaseQty = (id) => {
     const updated = cart
       .map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity - 1 } : item
+        item.id === id ? { ...item, quantity: item.quantity - 1 } : item,
       )
       .filter((item) => item.quantity > 0);
     updateCart(updated);
@@ -93,13 +100,12 @@ export default function Checkout() {
     return acc + price * quantity;
   }, 0);
 
-
   const notify = () => toast("Your cart is empty!");
-  
+
   // Loading state
   if (loading) {
     return (
-      <div className="">
+      <div>
         <Navbar />
         <div className="flex items-center justify-center min-h-[60vh] mt-[7rem]">
           <div className="text-center">
@@ -112,10 +118,9 @@ export default function Checkout() {
   }
 
   return (
-    <div className="">
+    <div>
       <Navbar />
       <div className="flex flex-col md:flex-row mt-[7rem] p-4 gap-6 inter">
-
         <ToastContainer toastClassName="poppins" />
 
         {/* Error Message */}
@@ -132,32 +137,31 @@ export default function Checkout() {
           <>
             <div className="space-y-4 md:w-[80%]">
               {cart.map((item) => (
-                <div
-                  key={item.id}
-                  className="border-b-2 gap-4"
-                >
+                <div key={item.id} className="border-b-2 gap-4 pb-2">
                   <div className="items-center justify-between flex">
                     <img
-                      src={item.product_image}
+                      src={item.product_images}
                       alt={item.product_name}
-                      className="w-20 h-20 object-cover rounded mr-2"
+                      className="w-full h-full object-cover"
                     />
                     <div className="flex-1">
                       <h2 className="font-medium md:text-lg text-[15px] flex">
                         {item.product_name}
                       </h2>
-                      
-                      <p className="text-sm text-gray-500 flex items-center gap-2">
-                        <div className="inline-block px-1 rounded border-2">
-                          <span className="capitalize">Color - {item.color}</span>
-                        </div>
 
-                      </p>
-                      
+                      {item.color && (
+                        <p className="text-sm text-gray-500 flex items-center gap-2 mt-1">
+                          <div className="inline-block px-1 rounded border-2">
+                            <span className="capitalize">
+                              Color - {item.color}
+                            </span>
+                          </div>
+                        </p>
+                      )}
                     </div>
 
                     <div className="text-right font-medium md:w-24 w-18 md:mr-7 mr-2">
-                      {(item.price * item.quantity).toFixed(2)}
+                      ₦{(item.price * item.quantity).toLocaleString()}
                     </div>
                     <div className="flex items-center gap-2">
                       <button
@@ -176,10 +180,7 @@ export default function Checkout() {
                     </div>
                   </div>
 
-
-                  <br />
-
-                  <div className="w-full flex justify-end mb-2">
+                  <div className="w-full flex justify-end mt-2">
                     <button
                       onClick={() => removeItem(item.id)}
                       className="text-red-500 hover:text-red-700 text-sm inline-block"
@@ -198,13 +199,13 @@ export default function Checkout() {
           <h2 className="font-semibold text-lg mb-4">Order Summary</h2>
           <div className="flex justify-between text-sm mb-2">
             <span>Subtotal</span>
-            <span>₦{total.toFixed(2)}</span>
+            <span>₦{total.toLocaleString()}</span>
           </div>
           <div className="flex justify-between text-base font-bold mb-4">
             <span>
               Cart Total <span className="text-sm">({cart.length} items)</span>
             </span>
-            <span>₦{total.toFixed(2)}</span>
+            <span>₦{total.toLocaleString()}</span>
           </div>
 
           <button

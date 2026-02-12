@@ -21,7 +21,7 @@ const ProductDetail = () => {
         setLoading(true);
         const data = await productAPI.getProduct(id);
         setProduct(data);
-        
+
         // Set default color if available
         if (data?.colors?.length) {
           setSelectedColor(data.colors[0]);
@@ -38,12 +38,12 @@ const ProductDetail = () => {
 
   const handleAddToCart = () => {
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
-    
+
     // Find item with matching ID AND color
     const itemIndex = cart.findIndex(
-      (item) => item.id === product.id && item.color === selectedColor
+      (item) => item.id === product.id && item.color === selectedColor,
     );
-    
+
     if (itemIndex > -1) {
       // If product with this color exists, increase its quantity
       cart[itemIndex].quantity += quantity;
@@ -58,7 +58,7 @@ const ProductDetail = () => {
         product_image: product.product_image,
       });
     }
-    
+
     localStorage.setItem("cart", JSON.stringify(cart));
     window.dispatchEvent(new Event("storage")); // Trigger update
   };
@@ -89,10 +89,7 @@ const ProductDetail = () => {
         <div className="flex items-center justify-center min-h-[60vh] mt-[7rem]">
           <div className="text-center">
             <p className="text-xl text-gray-600 mb-4">Product not found.</p>
-            <a 
-              href="/" 
-              className="text-black underline hover:text-gray-700"
-            >
+            <a href="/" className="text-black underline hover:text-gray-700">
               Return to home
             </a>
           </div>
@@ -131,23 +128,30 @@ const ProductDetail = () => {
           <div className="mb-4">
             <span className="font-medium mr-2 inter">Color:</span>
             <div className="flex space-x-2">
-              {product?.colors?.map((color, idx) => (
-                <button
-                  key={idx}
-                  className="w-8 h-8 rounded border border-gray-400 relative"
-                  style={{ backgroundColor: color.toLowerCase() }}
-                  onClick={() => setSelectedColor(color)}
-                >
-                  {selectedColor === color && (
-                    <FaCheck
-                      className="absolute inset-0 m-auto"
-                      style={{
-                        color: color.toLowerCase() === "white" ? "black" : "white",
-                      }}
-                    />
-                  )}
-                </button>
-              ))}
+              {product?.colors?.map((color, idx) => {
+                const isSelected = selectedColor === color;
+                const checkColor =
+                  color.toLowerCase() === "white" ? "black" : "white";
+
+                return (
+                  <button
+                    key={idx}
+                    className={`w-8 h-8 rounded border ${
+                      isSelected ? "border-black" : "border-gray-400"
+                    } relative cursor-pointer transition-transform transform hover:scale-110`}
+                    style={{ backgroundColor: color.toLowerCase() }}
+                    onClick={() => setSelectedColor(color)}
+                    title={color} // shows tooltip on hover
+                  >
+                    {isSelected && (
+                      <FaCheck
+                        className="absolute inset-0 m-auto"
+                        style={{ color: checkColor, fontSize: "16px" }}
+                      />
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -237,7 +241,11 @@ const ProductDetail = () => {
       </main>
 
       {/* Recommendations */}
-      <Recommendation />
+      <Recommendation
+        currentCategory={product.category}
+        currentProductId={product.id}
+      />
+
       <Footer />
     </div>
   );

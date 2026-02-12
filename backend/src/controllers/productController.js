@@ -17,7 +17,7 @@ export const getAllProducts = async (req, res) => {
     if (q) {
       const like = `%${q}%`;
       dbQuery = dbQuery.or(
-        `product_name.ilike.${like},description.ilike.${like},category.ilike.${like},price.ilike.${like}`,
+        `product_name.ilike.${like},description.ilike.${like},category.ilike.${like}`,
       );
     }
 
@@ -71,35 +71,46 @@ export const createProduct = async (req, res) => {
   console.log("==================");
 
   try {
-    // Validate that we have data
     if (!req.body) {
       return res.status(400).json({
         success: false,
-        message: "No data received"
+        message: "No data received",
       });
     }
 
-    const { product_name, quantity, category, price, description } = req.body || {};
+    const { product_name, quantity, category, price, description, colors } = req.body;
     const files = req.files || [];
 
-    // Validate required fields (quantity is optional)
+    // Validate required fields
     if (!product_name || !category || !price) {
       return res.status(400).json({
         success: false,
-        message: "Missing required fields: product_name, category, price are required"
+        message: "Missing required fields: product_name, category, price are required",
       });
+    }
+
+    // Parse colors JSON string into JS array
+    let colorsArray = [];
+    if (colors) {
+      try {
+        colorsArray = JSON.parse(colors);
+        if (!Array.isArray(colorsArray)) {
+          throw new Error("Colors must be an array");
+        }
+      } catch (err) {
+        console.warn("Failed to parse colors:", err.message);
+        colorsArray = [];
+      }
     }
 
     let imageUrls = [];
 
-    // Upload images to Supabase (handle single or multiple files)
+    // Upload images to Supabase
     if (files.length > 0) {
       console.log(`Uploading ${files.length} image(s)...`);
 
       for (const file of files) {
-        // multer's any() may provide fieldname; use originalname
         const fileName = `products/${Date.now()}-${file.originalname}`;
-
         console.log(`Uploading file: ${fileName}`);
 
         const { error: uploadError } = await supabase.storage
@@ -110,27 +121,26 @@ export const createProduct = async (req, res) => {
 
         if (uploadError) {
           console.error("Upload error:", uploadError);
-          // continue to next file instead of throwing to avoid 500 for one failed image
-          continue;
+          continue; // skip failed uploads
         }
 
         const { data: urlData } = supabase.storage
           .from("product-images")
           .getPublicUrl(fileName);
 
-        if (urlData && urlData.publicUrl) imageUrls.push(urlData.publicUrl);
+        if (urlData?.publicUrl) imageUrls.push(urlData.publicUrl);
         console.log(`Image uploaded: ${urlData?.publicUrl}`);
       }
     }
 
     console.log("Inserting product into database...");
 
-    // Insert product into database
     const insertPayload = {
       product_name,
       category,
       price: parseFloat(price),
       description,
+      colors: colorsArray, // ✅ store JS array into Postgres text[]
     };
 
     if (quantity) insertPayload.quantity = parseInt(quantity);
@@ -153,19 +163,19 @@ export const createProduct = async (req, res) => {
       message: "Product created successfully",
       data: data[0],
     });
-
   } catch (error) {
     console.error("=== ERROR IN createProduct ===");
     console.error("Error message:", error.message);
     console.error("Error stack:", error.stack);
     console.error("==============================");
-    
+
     res.status(500).json({
       success: false,
       message: error.message || "Internal server error",
     });
   }
 };
+
 
 // Update product (Admin)
 export const updateProduct = async (req, res) => {

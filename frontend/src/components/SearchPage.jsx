@@ -65,7 +65,7 @@ const SearchPage = () => {
                     🔥
                   </span>
                   <img
-                    src={product.product_image}
+                    src={product.product_images}
                     alt={product.product_name}
                     className="w-[100%] h-[100%]"
                   />

@@ -103,7 +103,10 @@ const ProductTable = () => {
 
                     <AddProductModal
                       isOpen={isModalOpen}
-                      closeModal={() => setIsModalOpen(false)}
+                      onClose={() => setIsModalOpen(false)} // ✅ correct prop name
+                      onCreated={(newProduct) =>
+                        setProducts([newProduct, ...products])
+                      } // optional: add new product immediately
                     />
 
                     <button className="flex items-center gap-2 px-[7px] py-[10px] border border-gray-200 rounded-[4px] hover:bg-gray-50">

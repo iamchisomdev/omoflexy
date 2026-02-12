@@ -12,48 +12,47 @@ const PaymentInfo = () => {
     });
   };
 
-
-
   const [total, setTotal] = useState(0);
+  const [customerInfo, setCustomerInfo] = useState({ firstName: "", lastName: "" });
+  const [orderSummary, setOrderSummary] = useState([]);
 
+  // Load total
   useEffect(() => {
     const storedTotal = Number(localStorage.getItem("orderTotal") || 0);
     setTotal(storedTotal);
   }, []);
 
-  const [customerInfo, setCustomerInfo] = useState({ firstName: "", lastName: "" });
-
+  // Load customer info
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("customerInfo")) || {};
     setCustomerInfo(saved);
   }, []);
 
-  const customerName = `${customerInfo.firstName} ${customerInfo.lastName}`;
-
-  const [orderSummary, setOrderSummary] = useState([]);
-
+  // Load order summary
   useEffect(() => {
     const summary = JSON.parse(localStorage.getItem("orderSummary")) || [];
     setOrderSummary(summary);
     setTotal(Number(localStorage.getItem("orderTotal") || 0));
   }, []);
+
+  const customerName = `${customerInfo.firstName} ${customerInfo.lastName}`;
+
+  // Build message lines with formatted prices
   const productLines = orderSummary.map(
     item =>
-      `\n- ${item.product_name} (${item.color}), ₦${Number(item.price).toFixed(2)} x${item.quantity}`
+      `\n- ${item.product_name} (${item.color || "N/A"}), ₦${Number(item.price).toLocaleString()} x${item.quantity}`
   ).join("");
 
-  const message = `Hello, I just made a payment of ₦${total.toFixed(2)} to Omoflexy Bead Empire,
-  my Name is ${customerName}
-  Products:${productLines}`;
+  const message = `Hello, I just made a payment of ₦${total.toLocaleString()} to Omoflexy Bead Empire,
+My Name is ${customerName}
+Products:${productLines}`;
 
   const whatsappLink = `https://wa.me/2349037768161?text=${encodeURIComponent(message)}`;
 
   return (
     <div className="min-h-screen bg-[#fffdf5] flex flex-col justify-between">
-
       <Navbar />
 
-      {/* Main Content */}
       <main className="flex-grow p-4 flex justify-center mt-[7rem] inter">
         <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-6">
           <div className="border border-yellow-500 bg-yellow-50 rounded-md p-4 mb-4 text-center text-sm">
@@ -103,13 +102,13 @@ const PaymentInfo = () => {
             <div>
               <p className="text-gray-500 text-sm">Grand Total</p>
               <div className="flex justify-between items-center">
-                <p className="text-xl font-bold">₦{total.toFixed(2)}</p>
+                <p className="text-xl font-bold">₦{total.toLocaleString()}</p>
                 <div className="flex items-center space-x-2">
                   {copiedField === "amount" ? (
                     <span className="text-green-600 text-xs font-medium">Copied!</span>
                   ) : (
                     <button
-                      onClick={() => handleCopy(total.toFixed(2), "amount")}
+                      onClick={() => handleCopy(total.toLocaleString(), "amount")}
                       className="text-sm text-yellow-600 border border-yellow-600 rounded px-2 py-1 hover:bg-yellow-100"
                     >
                       Copy Amount
@@ -122,7 +121,7 @@ const PaymentInfo = () => {
             {/* Instruction + WhatsApp Link */}
             <p className="text-xs text-gray-600 mt-4">
               Please kindly transfer the exact amount of{" "}
-              <span className="text-yellow-600 font-medium">{total.toFixed(2)}</span> to avoid cancellation of your order, and click{" "}
+              <span className="text-yellow-600 font-medium">₦{total.toLocaleString()}</span> to avoid cancellation of your order, and click{" "}
               <a
                 href={whatsappLink}
                 target="_blank"
