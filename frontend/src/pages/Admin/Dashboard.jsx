@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { productAPI } from "../../utils/api";
 import AddProductModal from "../../components/modals/AddProductModal";
 import Sidebar from "../../components/Admin/Sidebar";
+import Logo from "../../assets/image/logo1.jpg"; // Adjust path to your logo image
 
 // Laptop only wrapper (no logic changed)
 const LaptopOnly = ({ children }) => (
@@ -63,18 +64,22 @@ const ProductTable = () => {
   return (
     <LaptopOnly>
       <div className="">
-        <img src="/src/assets/image/logo1.jpg" alt="Logo" className="w-50 h-50 ml-5 my-2 object-contain" />
+        <img
+          src={Logo}
+          alt="Logo"
+          className="w-50 h-50 ml-5 my-2 object-contain"
+        />
         <div className="flex">
           <Sidebar />
-          <div className="flex-1 px-3 py-5 min-h-screen inter">
+          <div className="flex-1 py-5 min-h-screen inter">
             <div className="bg-white">
               {/* Header Section */}
-              <div className="p-2">
-                <h2 className="text-[20px] font-semibold text-gray-800 mb-3">
+              <div className="py-2">
+                <h2 className="text-[20px] font-semibold text-gray-800 mb-3 px-5">
                   My Products
                 </h2>
-                <hr className="mb-5"/>
-                <div className="flex items-center justify-between mb-6 w-[100%]">
+                <hr className="mb-5" />
+                <div className="flex items-center justify-between mb-6 w-[100%] px-5">
                   {/* Search */}
                   <div className="relative">
                     <Search
@@ -90,7 +95,7 @@ const ProductTable = () => {
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => setIsModalOpen(true)}
-                      className="flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-2xl shadow hover:opacity-90"
+                      className="flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-[4px] shadow hover:opacity-90"
                     >
                       <Plus size={18} />
                       Add Product
@@ -101,7 +106,7 @@ const ProductTable = () => {
                       closeModal={() => setIsModalOpen(false)}
                     />
 
-                    <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-2xl hover:bg-gray-50">
+                    <button className="flex items-center gap-2 px-[7px] py-[10px] border border-gray-200 rounded-[4px] hover:bg-gray-50">
                       <SlidersHorizontal size={18} />
                       <span className="font-medium">Sort and Filter</span>
                     </button>
@@ -166,14 +171,22 @@ const ProductTable = () => {
                           </td>
                           <td className="px-8 py-5 text-gray-600">
                             {product.created_at
-                              ? new Date(product.created_at).toLocaleDateString()
+                              ? new Date(product.created_at).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                  },
+                                )
                               : "N/A"}
                           </td>
+
                           <td className="px-8 py-5 text-gray-600">
                             {product.quantity}
                           </td>
                           <td className="px-8 py-5 font-semibold text-gray-900">
-                            {product.price}
+                            {product.price.toLocaleString()}
                           </td>
                           <td className="px-8 py-5">
                             <div className="flex items-center gap-4">

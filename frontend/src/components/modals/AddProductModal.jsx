@@ -43,27 +43,27 @@ export default function AddProductModal({ isOpen, onClose, onCreated }) {
 
     // Validate form
     if (!form.product_name.trim()) {
-      alert('Product name is required');
+      alert("Product name is required");
       setLoading(false);
       return;
     }
     if (!form.category) {
-      alert('Category is required');
+      alert("Category is required");
       setLoading(false);
       return;
     }
     if (!form.price || parseFloat(form.price) <= 0) {
-      alert('Valid price is required');
+      alert("Valid price is required");
       setLoading(false);
       return;
     }
     if (!form.quantity || parseInt(form.quantity) <= 0) {
-      alert('Valid quantity is required');
+      alert("Valid quantity is required");
       setLoading(false);
       return;
     }
     if (!form.description.trim()) {
-      alert('Description is required');
+      alert("Description is required");
       setLoading(false);
       return;
     }
@@ -89,7 +89,7 @@ export default function AddProductModal({ isOpen, onClose, onCreated }) {
 
       onCreated?.(data.data);
       onClose();
-      
+
       // Reset form
       setForm({
         product_name: "",
@@ -100,7 +100,6 @@ export default function AddProductModal({ isOpen, onClose, onCreated }) {
       });
       setImages([]);
       setPreview([]);
-      
     } catch (err) {
       alert(err.message);
     } finally {
@@ -110,18 +109,22 @@ export default function AddProductModal({ isOpen, onClose, onCreated }) {
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white w-full max-w-2xl rounded-2xl shadow-xl p-6">
+      <div className="bg-white w-[641px] max-w-2xl rounded-[8px] shadow-xl">
         {/* Header */}
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">Add Product</h2>
+        <div className="flex justify-between items-center mb-2 px-6 py-3">
+          <h2 className="text-[20px] font-[600]">Add Product</h2>
           <button onClick={onClose} className="text-gray-500">
             ✕
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <hr className="bg-black mb-2" />
+
+        <form onSubmit={handleSubmit} className="space-y-4 px-6 py-3">
           {/* Upload */}
-          <label className="border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer block">
+
+          <p className="text-[16px] font-[600]">Product Image</p>
+          <label className="border-2 bg-[#F6F6F6] rounded-[8px] p-8 text-center cursor-pointer block">
             <input
               type="file"
               multiple
@@ -129,9 +132,10 @@ export default function AddProductModal({ isOpen, onClose, onCreated }) {
               onChange={handleImages}
             />
             <p className="text-gray-500">
-              Click to upload or drag and drop
+              <span className="font-[600]">Click to upload </span>or drag and
+              drop
               <br />
-              <span className="text-xs">maximum of 3 images</span>
+              <span className="text-[12px]">maximum of 3 images</span>
             </p>
           </label>
 
@@ -218,18 +222,18 @@ export default function AddProductModal({ isOpen, onClose, onCreated }) {
           />
 
           {/* Footer */}
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="flex justify-between pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border rounded-xl"
+              className="px-4 py-2 border text-[14px] rounded-[4px]"
             >
               Cancel
             </button>
 
             <button
               disabled={loading}
-              className="px-6 py-2 bg-black text-white rounded-xl"
+              className="px-4 py-2 bg-[#1F2937] text-white text-[14px] rounded-[4px]"
             >
               {loading ? "Creating..." : "Create"}
             </button>

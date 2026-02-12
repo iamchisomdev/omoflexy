@@ -114,7 +114,7 @@ const ProductDetail = () => {
             <span className="absolute top-2 left-2 bg-[#F4EBD0] text-white text-xs px-1 py-1 rounded-[4px]">
               🔥
             </span>
-            <img src={product.product_image} alt={product.product_name} />
+            <img src={product.product_images} alt={product.product_name} />
           </div>
         </div>
 
@@ -124,7 +124,7 @@ const ProductDetail = () => {
             {product.product_name}
           </h1>
           <p className="text-lg text-[#806B07] font-bold mb-4 inter">
-            ₦{product.price}
+            ₦{product.price.toLocaleString()}
           </p>
 
           {/* Color Options */}
