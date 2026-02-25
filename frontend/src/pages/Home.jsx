@@ -54,7 +54,7 @@ const Home = () => {
         <img
           src={image1}
           alt="Beaded Bag"
-          className="md:w-full md:h-50 w-full h-40 md:object-cover"
+          className="md:w-full lg:h-[220px] w-full h-[110px] md:object-cover"
         />
       </div>
 
@@ -84,17 +84,17 @@ const Home = () => {
                 {visibleProducts.map(
                   ({ id, product_name, category, price, product_images }) => (
                     <Link to={`/product/${id}`} key={id} className="">
-                      <div className="w-full h-40 bg-white flex mt-[60px] items-center justify-center relative">
-                        <span className="absolute top-[-40px] left-2 bg-[#F4EBD0] text-white text-xs px-1 py-1 rounded-[4px]">
+                      <div className="w-full h-40 bg-white flex md:mt-[60px] mt-[20px] items-center justify-center relative">
+                        <span className="absolute md:top-[-40px] top-[-20px] left-2 bg-[#F4EBD0] text-white text-xs px-1 py-1 rounded-[4px]">
                           🔥
                         </span>
                         <img
                           src={product_images}
                           alt={product_name}
-                          className="w-[100%] h-[270px] object-cover"
+                          className="w-[100%] md:h-[270px] h-[220px] object-cover"
                         />
                       </div>
-                      <div className="bg-[#FEF9E9] p-4 mt-[60px]">
+                      <div className="bg-[#FEF9E9] p-4 md:mt-[60px] mt-[20px]">
                         <h3 className="text-sm font-medium inter">
                           {product_name}
                         </h3>
