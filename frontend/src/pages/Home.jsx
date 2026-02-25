@@ -54,7 +54,7 @@ const Home = () => {
         <img
           src={image1}
           alt="Beaded Bag"
-          className="w-full h-50 object-cover"
+          className="w-full md:h-50 h-100 object-cover"
         />
       </div>
 
@@ -63,7 +63,7 @@ const Home = () => {
 
         {loading && (
           <div className="text-center py-10">
-            <p className="text-gray-600">Loading products...</p>
+            <p className="text-gray-600 inter text-[20px]">Loading products...</p>
           </div>
         )}
 
@@ -84,17 +84,17 @@ const Home = () => {
                 {visibleProducts.map(
                   ({ id, product_name, category, price, product_images }) => (
                     <Link to={`/product/${id}`} key={id} className="">
-                      <div className="w-full h-40 bg-white flex items-center justify-center relative">
-                        <span className="absolute top-2 left-2 bg-[#F4EBD0] text-white text-xs px-1 py-1 rounded-[4px]">
+                      <div className="w-full h-40 bg-white flex mt-[60px] items-center justify-center relative">
+                        <span className="absolute top-[-40px] left-2 bg-[#F4EBD0] text-white text-xs px-1 py-1 rounded-[4px]">
                           🔥
                         </span>
                         <img
                           src={product_images}
                           alt={product_name}
-                          className="w-[100%] h-[100%] object-cover"
+                          className="w-[100%] h-[270px] object-cover"
                         />
                       </div>
-                      <div className="bg-[#FEF9E9] p-4">
+                      <div className="bg-[#FEF9E9] p-4 mt-[60px]">
                         <h3 className="text-sm font-medium inter">
                           {product_name}
                         </h3>

@@ -126,7 +126,7 @@ const ProductTable = () => {
 
               {/* Loading */}
               {loading ? (
-                <div className="p-12 text-center text-gray-500">
+                <div className="p-12 text-center text-gray-500 inter text-[20px]">
                   Loading products...
                 </div>
               ) : products.length === 0 ? (

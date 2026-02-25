@@ -74,7 +74,7 @@ const SearchPage = () => {
                   <h3 className="text-sm font-medium inter">{product.product_name}</h3>
                   <div className="md:inline-flex justify-between items-center w-full">
                     <p className="font-semibold text-black mt-1 inter">
-                      ₦{product.price}
+                      ₦{price?.toLocaleString()}
                     </p>
                     <p className="text-gray-700 text-xs inter">{product.category}</p>
                   </div>
