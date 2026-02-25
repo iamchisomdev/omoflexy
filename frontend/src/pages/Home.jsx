@@ -54,7 +54,7 @@ const Home = () => {
         <img
           src={image1}
           alt="Beaded Bag"
-          className="w-full md:h-50 h-100 object-cover"
+          className="w-full md:h-50 h-[100px] object-cover"
         />
       </div>
 
