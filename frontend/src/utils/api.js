@@ -90,8 +90,11 @@ export const authAPI = {
 
     const data = await handleResponse(response);
 
+    // Clear auth state from localStorage
+    localStorage.removeItem("adminAuth");
+
     if (response.ok && navigate) {
-      navigate('/login'); // redirect to login after logout
+      navigate('/admin/login'); // redirect to login after logout
     }
 
     return data;

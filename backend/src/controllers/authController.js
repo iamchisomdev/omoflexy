@@ -17,7 +17,7 @@ export const login = async (req, res) => {
     // Store user session
     req.session.user = { id: user.id, email: user.email };
     
-    return res.json({ message: 'Login successful', redirect: '/dashboard' });
+    return res.json({ message: 'Login successful', redirect: '/admin/dashboard' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
